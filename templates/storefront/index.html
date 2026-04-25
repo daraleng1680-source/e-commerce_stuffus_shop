@@ -1,0 +1,110 @@
+{% extends "storefront/base.html" %}
+
+{% block title %}Stuffus - Premium E-Commerce{% endblock %}
+
+{% block content %}
+<!-- Large Hero Section -->
+<div class="row g-0 rounded-4 overflow-hidden mb-5" style="background: #eef2f3; min-height: 600px;">
+    <div class="col-lg-6 p-5 d-flex flex-column justify-content-center">
+        <span class="badge bg-dark rounded-pill mb-3 align-self-start px-3 py-2">Spring Collection 2024</span>
+        <h1 class="display-2 text-extra-bold mb-4" style="line-height: 1.1;">Find Your<br>Perfect Style</h1>
+        <p class="lead text-muted mb-5">Explore our curated collection of premium products designed to elevate your everyday life.</p>
+        <div class="d-flex gap-3">
+            <a href="{{ url_for('storefront.shop') }}" class="btn btn-dark rounded-pill px-5 py-3 text-bold">Shop Now</a>
+            <a href="#" class="btn btn-outline-dark rounded-pill px-5 py-3 text-bold">Explore More</a>
+        </div>
+    </div>
+    <div class="col-lg-6" style="background: url('https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=2070&auto=format&fit=crop') center/cover;">
+    </div>
+</div>
+
+<!-- Category Highlights -->
+<div class="py-5">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+        <div>
+            <h2 class="text-extra-bold mb-1">Shop by Category</h2>
+            <p class="text-muted small mb-0">Discover products by their specialized categories</p>
+        </div>
+        <a href="{{ url_for('storefront.shop') }}" class="text-dark small text-bold">View All &rarr;</a>
+    </div>
+    <div class="row g-4">
+        {% for category in categories[:3] %}
+            <div class="col-md-4">
+                <a href="{{ url_for('storefront.shop', category=category.id) }}" class="text-decoration-none">
+                    <div class="glass p-4 rounded-4 text-center transition-hover border">
+                        <div class="bg-light rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fa fa-{{ 'box' if loop.index0 == 0 else 'mobile-alt' if loop.index1 == 1 else 'music' }} fa-2x text-dark"></i>
+                        </div>
+                        <h5 class="text-bold text-dark">{{ category.category_name }}</h5>
+                        <p class="small text-muted">{{ category.description or 'Explore products' }}</p>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Featured Products -->
+<div class="py-5">
+    <div class="text-center mb-5">
+        <h2 class="text-extra-bold mb-2">Featured Products</h2>
+        <p class="text-muted">Handpicked selection of our top-rated items</p>
+    </div>
+    <div class="row g-4">
+        {% for product in featured_products %}
+            <div class="col-md-3">
+                <div class="product-card-minimal">
+                    <div class="product-img-container" style="background: #f9f9f9; height: 250px;">
+                        <a href="{{ url_for('storefront.product_detail', product_id=product.id) }}" class="d-block w-100 h-100">
+                            {% if product.image %}
+                                <img src="{{ url_for('static', filename='upload/' + product.image) }}" class="w-100 h-100 object-fit-contain" alt="{{ product.product_name }}">
+                            {% else %}
+                                <i class="fa fa-box fa-3x text-muted opacity-25"></i>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div class="product-info px-2">
+                        <h6 class="product-name small mb-1">
+                            <a href="{{ url_for('storefront.product_detail', product_id=product.id) }}" class="text-dark text-decoration-none">{{ product.product_name }}</a>
+                        </h6>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-bold small">${{ "%.2f"|format(product.price) }}</span>
+                            <a href="{{ url_for('storefront.product_detail', product_id=product.id) }}" class="text-muted small"><i class="fa fa-plus-circle"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-5">
+        <a href="{{ url_for('storefront.shop') }}" class="btn btn-dark rounded-pill px-5 py-2">See Everything</a>
+    </div>
+</div>
+
+<!-- Benefits Section -->
+<div class="cta-banner mt-5 d-flex flex-column align-items-center text-center">
+    <h2 class="text-extra-bold mb-5">Why Shop With Stuffus?</h2>
+    <div class="row w-100 g-4">
+        <div class="col-md-4">
+            <i class="fa fa-truck-fast fa-2x mb-3 text-white text-opacity-50"></i>
+            <h5 class="text-bold">Fast Delivery</h5>
+            <p class="small text-white text-opacity-50">Free shipping on all orders over $50.00</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fa fa-shield-alt fa-2x mb-3 text-white text-opacity-50"></i>
+            <h5 class="text-bold">Secure Payment</h5>
+            <p class="small text-white text-opacity-50">Your security is our top priority</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fa fa-headset fa-2x mb-3 text-white text-opacity-50"></i>
+            <h5 class="text-bold">24/7 Support</h5>
+            <p class="small text-white text-opacity-50">We are here to help anytime</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-hover { transition: all 0.3s ease; }
+    .transition-hover:hover { transform: translateY(-10px); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+</style>
+{% endblock %}

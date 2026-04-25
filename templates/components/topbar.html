@@ -1,0 +1,78 @@
+<!-- TOP BAR COMPONENT -->
+<div class="topbar">
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="page-header-topbar">
+            <button id="sidebarToggle" class="mobile-toggle-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2 class="module-title">
+                {% if module_icon %}
+                    <i class="fas {{ module_icon }}"></i>
+                {% endif %}
+                {{ module_name or 'Dashboard' }}
+            </h2>
+        </div>
+        <div class="top-actions" style="display: flex; align-items: center; gap: 24px;">
+            <div class="notification-bell" style="position: relative; cursor: pointer; font-size: 1.2rem; color: #718096; transition: color 0.3s;">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" style="position: absolute; top: -8px; right: -8px; background: #ff9500; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">3</span>
+            </div>
+            <div class="admin-profile" style="display: flex; align-items: center; gap: 12px; padding-left: 16px; border-left: 1px solid #e8e8e8;">
+                <div style="text-align: right;">
+                    <div style="font-weight: 600; color: #2c2c2c; font-size: 0.9rem;">{{ session.get('username', 'Admin') }}</div>
+                    <div style="font-size: 0.8rem; color: #718096;">{{ session.get('profile', 'Administrator') }}</div>
+                </div>
+                <div class="admin-avatar" style="width: 40px; height: 40px; background: linear-gradient(135deg, #ff9500 0%, #ff8c00 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; box-shadow: 0 2px 8px rgba(255, 149, 0, 0.3);">
+                    {{ session.get('username', 'A')[0].upper() }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-header-topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+    }
+
+    .module-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #2c2c2c;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .module-title i {
+        color: #ff9500;
+        font-size: 1.8rem;
+    }
+
+    .notification-bell:hover {
+        color: #ff9500;
+    }
+
+    .mobile-toggle-btn {
+        display: none;
+        background: none;
+        border: none;
+        color: #2c2c2c;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+        margin-right: 15px;
+        align-items: center;
+        justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-toggle-btn {
+            display: flex;
+        }
+    }
+</style>

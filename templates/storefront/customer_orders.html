@@ -1,0 +1,47 @@
+{% extends "storefront/base.html" %}
+
+{% block title %}My Orders - Stuffus{% endblock %}
+
+{% block content %}
+<div class="row g-5">
+    <!-- Sidebar -->
+    <div class="col-lg-3">
+        <div class="bg-white rounded-4 border p-4 shadow-sm">
+            <div class="text-center mb-4">
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                    <i class="fa fa-user fa-2x text-muted"></i>
+                </div>
+                <h6 class="text-bold mb-1">{{ session.get('customer_email') }}</h6>
+                <span class="badge bg-dark rounded-pill x-small">Member</span>
+            </div>
+            
+            <div class="d-flex flex-column gap-1">
+                <a href="{{ url_for('storefront.customer_orders') }}" class="category-item active">
+                    <span><i class="fa fa-shopping-bag me-2"></i> My Orders</span>
+                </a>
+                <a href="#" class="category-item">
+                    <span><i class="fa fa-heart me-2"></i> Wishlist</span>
+                </a>
+                <a href="#" class="category-item">
+                    <span><i class="fa fa-cog me-2"></i> Settings</span>
+                </a>
+                <a href="{{ url_for('storefront.customer_logout') }}" class="category-item text-danger">
+                    <span><i class="fa fa-sign-out-alt me-2"></i> Logout</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9">
+        <h3 class="text-bold mb-4">Order History</h3>
+        
+        <div class="bg-white rounded-4 border p-5 shadow-sm text-center">
+            <div class="display-1 mb-4 opacity-10">📦</div>
+            <h4 class="text-bold">No orders found</h4>
+            <p class="text-muted small">Looks like you haven't placed any orders yet. Discover our latest collection and find something you love!</p>
+            <a href="{{ url_for('storefront.shop') }}" class="btn btn-dark rounded-pill px-4 py-2 mt-3">Start Shopping</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Management - Stuffus Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-mini {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid #f0f0f0;
+    }
+    .stat-mini-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    .stat-mini-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .page-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .page-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .page-title i { color: var(--accent-orange); }
+    .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .search-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        flex: 1;
+        max-width: 400px;
+    }
+    .search-box input {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-size: 0.9rem;
+        background: transparent;
+    }
+    .btn-add {
+        background: linear-gradient(135deg, var(--accent-orange), #e08500);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.2s;
+    }
+    .btn-add:hover { opacity: 0.9; }
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+    .table { margin: 0; }
+    .table thead th {
+        background: #f8f9fa;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 14px 16px;
+        border-bottom: 1px solid #eee;
+    }
+    .table tbody td {
+        padding: 14px 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 0.9rem;
+    }
+    .table tbody tr:last-child td { border-bottom: none; }
+    .customer-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .customer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), #2a5298);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+    .member-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 6px;
+    }
+    .member-badge-bronze, .member-badge[data-badge="Bronze"] { background: #f3ede3; color: #8c6239; }
+    .member-badge-silver, .member-badge[data-badge="Silver"] { background: #eef0f3; color: #5a6473; }
+    .member-badge-gold,   .member-badge[data-badge="Gold"]   { background: #fff8e1; color: #b8860b; }
+    .action-buttons { display: flex; gap: 8px; }
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    .btn-view    { background: #e3f2fd; color: #1565c0; }
+    .btn-message { background: #e8f5e9; color: #2e7d32; }
+    .btn-icon:hover { transform: scale(1.1); opacity: 0.85; }
+    .detail-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 16px;
+    }
+    .section-title {
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .detail-item:last-child { border-bottom: none; }
+    .detail-label { font-size: 0.85rem; color: var(--text-secondary); }
+    .detail-value { font-weight: 600; font-size: 0.9rem; }
+    .status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .status-completed, .status-delivered { background: #d4edda; color: #155724; }
+    .status-pending   { background: #fff3cd; color: #856404; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .no-orders-msg { color: var(--text-secondary); font-style: italic; font-size: 0.9rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <i class="fas fa-users"></i>
+        Customer Management
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Stats -->
+<div class="stats-container">
+    <div class="stat-mini">
+        <div class="stat-mini-value">{{ stats.total_customers }}</div>
+        <div class="stat-mini-label">Total Customers</div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-value">{{ stats.total_spent }}</div>
+        <div class="stat-mini-label">Total Revenue</div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-value">{{ stats.avg_spent }}</div>
+        <div class="stat-mini-label">Avg. Value</div>
+    </div>
+    <div class="stat-mini">
+        <div class="stat-mini-value">{{ stats.retention }}</div>
+        <div class="stat-mini-label">Retention</div>
+    </div>
+</div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+    <div class="search-box">
+        <i class="fas fa-search" style="color:#6c757d;"></i>
+        <input type="text" id="customerSearch" placeholder="Search by name, email, or phone...">
+    </div>
+    <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+        <i class="fas fa-user-plus"></i> Add Customer
+    </button>
+</div>
+
+<!-- Table -->
+<div class="table-card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Total Orders</th>
+                <th>Total Spent</th>
+                <th>Member Since</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="customerTableBody">
+            {% for customer in customers %}
+            <tr>
+                <td>
+                    <div class="customer-info">
+                        <div class="customer-avatar">{{ customer.initials }}</div>
+                        <div>
+                            <strong>{{ customer.name }}</strong>
+                            <span class="member-badge member-badge-{{ customer.badge|lower }}">{{ customer.badge }}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.phone }}</td>
+                <td>{{ customer.total_orders }}</td>
+                <td>{{ customer.total_spent }}</td>
+                <td>{{ customer.member_since }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-icon btn-view"
+                                data-bs-toggle="modal"
+                                data-bs-target="#customerDetailModal"
+                                data-name="{{ customer.name }}"
+                                data-email="{{ customer.email }}"
+                                data-phone="{{ customer.phone }}"
+                                data-since="{{ customer.member_since }}"
+                                data-orders="{{ customer.total_orders }}"
+                                data-spent="{{ customer.total_spent }}"
+                                data-avg="{{ customer.avg_spent }}"
+                                data-badge="{{ customer.badge }}"
+                                data-address="{{ customer.address }}"
+                                data-city="{{ customer.city }}"
+                                data-recent-orders="{{ customer.recent_orders_json | e }}"
+                                onclick="viewCustomerDetails(this)"
+                                title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-icon btn-message" title="Send Email"
+                                onclick="window.location='mailto:{{ customer.email }}'">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center py-4" style="color:#aaa;">
+                    <i class="fas fa-users me-2"></i> No customers found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Dynamic Pagination -->
+{% if pagination.total_pages > 1 %}
+<nav aria-label="Customer pagination">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('customer_module.customers_route', page=pagination.prev_page) }}">
+                <i class="fas fa-chevron-left"></i> Previous
+            </a>
+        </li>
+        {% for p in pagination.pages %}
+        <li class="page-item {% if p == pagination.current_page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('customer_module.customers_route', page=p) }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('customer_module.customers_route', page=pagination.next_page) }}">
+                Next <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Customer Detail Modal -->
+<div class="modal fade" id="customerDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerDetailTitle">
+                    <i class="fas fa-user me-2"></i> Customer Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <div class="detail-section h-100">
+                            <h6 class="section-title"><i class="fas fa-user"></i> Personal Information</h6>
+                            <div class="detail-item">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-value" id="viewCustName">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value" id="viewCustEmail">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Phone</span>
+                                <span class="detail-value" id="viewCustPhone">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Member Since</span>
+                                <span class="detail-value" id="viewCustSince">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Location</span>
+                                <span class="detail-value" id="viewCustCity">—</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-section h-100">
+                            <h6 class="section-title"><i class="fas fa-chart-bar"></i> Purchase Statistics</h6>
+                            <div class="detail-item">
+                                <span class="detail-label">Total Orders</span>
+                                <span class="detail-value" id="viewCustOrders">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Total Spent</span>
+                                <span class="detail-value" id="viewCustSpent">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Average Order</span>
+                                <span class="detail-value" id="viewCustAvg">—</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Membership</span>
+                                <span class="detail-value" id="viewCustBadge">—</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="section-title mb-2"><i class="fas fa-shopping-bag"></i> Recent Orders</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="viewCustRecentOrders">
+                            <tr>
+                                <td colspan="4" class="no-orders-msg text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCustomerLabel">
+                    <i class="fas fa-user-plus"></i> Add New Customer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCustomerForm" method="POST" action="{{ url_for('customer_module.add_customer') }}">
+                    <div class="mb-3">
+                        <label for="customerName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="customerName" name="name" placeholder="e.g., John Doe" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerEmail" class="form-label">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="customerEmail" name="email" placeholder="e.g., john@example.com" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerPhone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="customerPhone" name="phone" placeholder="e.g., (555) 123-4567">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerCity" class="form-label">City</label>
+                        <input type="text" class="form-control" id="customerCity" name="city" placeholder="e.g., New York">
+                    </div>
+                    <div class="mb-3">
+                        <label for="customerMembership" class="form-label">Membership Level</label>
+                        <select class="form-select" id="customerMembership" name="membership">
+                            <option value="Bronze">Bronze</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gold">Gold</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer px-0 pb-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Customer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ── Live Search ──────────────────────────────────────────────
+    document.getElementById('customerSearch').addEventListener('keyup', function () {
+        const term = this.value.toLowerCase();
+        document.querySelectorAll('#customerTableBody tr').forEach(row => {
+            const name  = row.cells[0] ? row.cells[0].textContent.toLowerCase() : '';
+            const email = row.cells[1] ? row.cells[1].textContent.toLowerCase() : '';
+            const phone = row.cells[2] ? row.cells[2].textContent.toLowerCase() : '';
+            row.style.display = (name.includes(term) || email.includes(term) || phone.includes(term)) ? '' : 'none';
+        });
+    });
+
+    // ── Customer Detail Modal ────────────────────────────────────
+    function viewCustomerDetails(btn) {
+        const name   = btn.dataset.name;
+        const email  = btn.dataset.email;
+        const phone  = btn.dataset.phone;
+        const since  = btn.dataset.since;
+        const orders = btn.dataset.orders;
+        const spent  = btn.dataset.spent;
+        const avg    = btn.dataset.avg;
+        const badge  = btn.dataset.badge;
+        const city   = btn.dataset.city;
+
+        document.getElementById('customerDetailTitle').innerHTML =
+            `<i class="fas fa-user me-2"></i> ${name}`;
+        document.getElementById('viewCustName').textContent   = name;
+        document.getElementById('viewCustEmail').textContent  = email;
+        document.getElementById('viewCustPhone').textContent  = phone;
+        document.getElementById('viewCustSince').textContent  = since;
+        document.getElementById('viewCustCity').textContent   = city;
+        document.getElementById('viewCustOrders').textContent = orders;
+        document.getElementById('viewCustSpent').textContent  = spent;
+        document.getElementById('viewCustAvg').textContent    = avg;
+        document.getElementById('viewCustBadge').innerHTML    =
+            `<span class="member-badge member-badge-${badge.toLowerCase()}">${badge}</span>`;
+
+        // Populate recent orders table
+        const tbody = document.getElementById('viewCustRecentOrders');
+        let recentOrders = [];
+        try {
+            recentOrders = JSON.parse(btn.dataset.recentOrders || '[]');
+        } catch (e) { recentOrders = []; }
+
+        if (recentOrders.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="no-orders-msg text-center">No orders found for this customer.</td></tr>`;
+        } else {
+            const statusClass = s => {
+                const sl = s.toLowerCase();
+                if (sl === 'completed' || sl === 'delivered') return 'status-completed';
+                if (sl === 'pending')   return 'status-pending';
+                if (sl === 'cancelled') return 'status-cancelled';
+                return '';
+            };
+            tbody.innerHTML = recentOrders.map(o => `
+                <tr>
+                    <td>${o.id}</td>
+                    <td>${o.date}</td>
+                    <td>${o.amount}</td>
+                    <td><span class="status-badge ${statusClass(o.status)}">${o.status}</span></td>
+                </tr>
+            `).join('');
+        }
+    }
+</script>
+{% endblock %}

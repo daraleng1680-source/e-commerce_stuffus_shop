@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Add Category - Stuffus Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Form specific styles */
+
+    .form-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: var(--card-white);
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 40px;
+    }
+
+    .form-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+    }
+
+    .form-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0;
+    }
+
+    .form-header i {
+        color: var(--accent-orange);
+        font-size: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid var(--border-light);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent-orange);
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+    }
+
+    .form-group small {
+        display: block;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: 6px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 32px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8c00 100%);
+        color: white;
+        flex: 1;
+        box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+        color: white;
+    }
+
+    .btn-cancel {
+        background: var(--bg-light);
+        color: var(--text-secondary);
+        flex: 1;
+        border: 1px solid var(--border-light);
+    }
+
+    .btn-cancel:hover {
+        background: var(--border-light);
+        color: var(--text-dark);
+    }
+
+    .alert {
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-success {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-left: 4px solid var(--success-color);
+    }
+
+    .alert-danger {
+        background: #ffebee;
+        color: #c62828;
+        border-left: 4px solid var(--danger-color);
+    }
+
+    .alert-warning {
+        background: #fff3e0;
+        color: #e65100;
+        border-left: 4px solid var(--accent-orange);
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-header">
+        <i class="fas fa-plus-circle"></i>
+        <h1>Add New Category</h1>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('category_module.add_category') }}">
+        <div class="form-group">
+            <label for="name">Category Name</label>
+            <input type="text" class="form-control" id="name" name="name" placeholder="e.g., Indoor Plants" required>
+            <small>The name must be unique and descriptive</small>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea class="form-control" id="description" name="description" placeholder="Describe this category..." required></textarea>
+            <small>Provide a brief description of what this category contains</small>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-submit">
+                <i class="fas fa-save"></i> Add Category
+            </button>
+            <a href="{{ url_for('category_module.categories_route') }}" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

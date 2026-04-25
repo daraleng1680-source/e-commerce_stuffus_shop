@@ -1,0 +1,117 @@
+{% extends "storefront/base.html" %}
+
+{% block title %}{{ product.product_name }} - Stuffus{% endblock %}
+
+{% block content %}
+<div class="row g-5">
+    <!-- Product Image -->
+    <div class="col-md-6">
+        <div class="product-img-container" style="background: #f3f3f3; height: 500px; border-radius: 20px;">
+            {% if product.image %}
+                <img src="{{ url_for('static', filename='upload/' + product.image) }}" class="w-100 h-100 object-fit-contain" alt="{{ product.product_name }}">
+            {% else %}
+                <i class="fa fa-box fa-5x text-muted opacity-25"></i>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('storefront.shop') }}" class="text-muted text-decoration-none small">Shop</a></li>
+                <li class="breadcrumb-item active small" aria-current="page">{{ product.product_name }}</li>
+            </ol>
+        </nav>
+
+        <h1 class="text-extra-bold mb-3">{{ product.product_name }}</h1>
+        
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <h2 class="text-bold mb-0">${{ "%.2f"|format(product.price) }}</h2>
+            <div class="product-rating small">
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star text-warning"></i>
+                <i class="fa fa-star text-warning"></i>
+                <span class="text-muted ms-2">(1.2k Reviews)</span>
+            </div>
+        </div>
+
+        <p class="text-muted mb-5" style="line-height: 1.8;">
+            {{ product.description }}
+        </p>
+
+        <div class="mb-5">
+            <h6 class="sidebar-title small mb-3">Quantity</h6>
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center border rounded-pill px-3 py-2 bg-white">
+                    <button class="btn btn-sm p-0 border-0" onclick="updateQty(-1)"><i class="fa fa-minus small"></i></button>
+                    <input type="number" id="detail_qty" value="1" min="1" max="{{ product.stock }}" class="border-0 text-center mx-2" style="width: 40px; outline: none; background: transparent;">
+                    <button class="btn btn-sm p-0 border-0" onclick="updateQty(1)"><i class="fa fa-plus small"></i></button>
+                </div>
+                <span class="text-muted small">{{ product.stock }} items available</span>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3">
+            <form method="POST" action="{{ url_for('storefront.add_to_cart', product_id=product.id) }}" class="flex-grow-1" id="addToCartForm">
+                <input type="hidden" name="quantity" id="form_qty" value="1">
+                <button type="submit" class="btn-buy-now w-100 py-3">Add to Cart</button>
+            </form>
+            <button class="btn btn-dark rounded-pill px-4" style="width: 60px;"><i class="fa fa-heart"></i></button>
+        </div>
+
+        <div class="mt-5 pt-4 border-top">
+            <div class="row g-4">
+                <div class="col-6">
+                    <h6 class="small text-bold mb-1">Free Delivery</h6>
+                    <p class="small text-muted mb-0">On orders over $50.00</p>
+                </div>
+                <div class="col-6">
+                    <h6 class="small text-bold mb-1">Return Policy</h6>
+                    <p class="small text-muted mb-0">30 days easy return</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Related Section -->
+{% if related_products %}
+<div class="mt-5 pt-5">
+    <h4 class="text-bold mb-4">Related Products</h4>
+    <div class="row g-4">
+        {% for rel in related_products %}
+            <div class="col-md-3">
+                 <div class="product-card-minimal">
+                    <div class="product-img-container" style="background: #f9f9f9; height: 200px;">
+                         {% if rel.image %}
+                            <img src="{{ url_for('static', filename='upload/' + rel.image) }}" class="w-100 h-100 object-fit-contain" alt="{{ rel.product_name }}">
+                        {% else %}
+                            <i class="fa fa-box fa-2x text-muted opacity-25"></i>
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <h6 class="product-name small mb-1">{{ rel.product_name }}</h6>
+                        <div class="product-price small text-bold">${{ "%.2f"|format(rel.price) }}</div>
+                    </div>
+                 </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+    function updateQty(delta) {
+        const input = document.getElementById('detail_qty');
+        const formInput = document.getElementById('form_qty');
+        let val = parseInt(input.value) + delta;
+        if (val < 1) val = 1;
+        if (val > {{ product.stock }}) val = {{ product.stock }};
+        input.value = val;
+        formInput.value = val;
+    }
+</script>
+{% endblock %}

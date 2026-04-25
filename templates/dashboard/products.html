@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+
+{% block title %}Products - StyleHub Admin{% endblock %}
+
+{% block content %}
+<style>
+    /* Module-specific styles only */
+
+    .module-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .module-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .module-title i {
+        color: var(--accent-orange);
+        font-size: 2.2rem;
+    }
+
+    .module-controls {
+        display: flex;
+        gap: 50%;
+        align-items: center;
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: space-between !important;
+        margin-bottom: 20px;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 280px;
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--card-white);
+        padding: 12px 16px;
+        border-radius: 10px;
+        border: 2px solid var(--border-light);
+        transition: all 0.3s ease;
+    }
+
+    .search-box:focus-within {
+        border-color: var(--accent-orange);
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+    }
+
+    .search-box i {
+        color: var(--accent-orange);
+        font-size: 1.1rem;
+    }
+
+    .search-box input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 0.95rem;
+        color: var(--text-dark);
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8c00 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 149, 0, 0.4);
+        color: white;
+    }
+
+
+    .products-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: var(--card-white);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(30, 58, 95, 0.08);
+        margin-bottom: 36px;
+        font-size: 1rem;
+    }
+
+    .products-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--bg-light);
+        color: var(--primary-color);
+        padding: 16px 18px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 1.05rem;
+        border-bottom: 1.5px solid var(--border-light);
+        letter-spacing: 0.5px;
+    }
+
+    .products-table tbody tr {
+        border-left: 4px solid transparent;
+        transition: background 0.18s, box-shadow 0.18s, border-color 0.18s;
+        background: #fff;
+        box-shadow: 0 1px 0 0 var(--border-light);
+    }
+
+    .products-table tbody tr:nth-child(even) {
+        background: #f7f9fb;
+    }
+
+    .products-table tbody tr:hover {
+        background: #f0f6ff;
+        border-left: 4px solid var(--accent-orange);
+        box-shadow: 0 4px 16px rgba(30, 58, 95, 0.08);
+    }
+
+    .products-table tbody td {
+        padding: 18px 16px;
+        color: var(--text-dark);
+        font-size: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .products-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .product-image-small {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        background: rgba(76, 175, 80, 0.15);
+        color: #4caf50;
+    }
+
+    .price-text {
+        color: var(--accent-orange);
+        font-weight: 700;
+    }
+
+    .table-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(.4,0,.2,1);
+        text-decoration: none;
+        font-size: 1.1rem;
+        background: #f5f6fa;
+        margin: 0 2px;
+        box-shadow: 0 1px 2px rgba(30,58,95,0.04);
+    }
+
+    .edit-btn {
+        color: var(--accent-orange);
+        border: 1.5px solid var(--accent-orange);
+        background: #fff7ed;
+    }
+
+    .edit-btn:hover {
+        background: var(--accent-orange);
+        color: #fff;
+        border-color: var(--accent-orange);
+        box-shadow: 0 2px 8px rgba(255,149,0,0.12);
+        transform: translateY(-1px) scale(1.05);
+    }
+
+    .delete-btn {
+        color: #f44336;
+        border: 1.5px solid #f44336;
+        background: #fff5f5;
+    }
+
+    .delete-btn:hover {
+        background: #f44336;
+        color: #fff;
+        border-color: #f44336;
+        box-shadow: 0 2px 8px rgba(244,67,54,0.12);
+        transform: translateY(-1px) scale(1.05);
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-top: 40px;
+        padding: 30px 0;
+        flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+        padding: 10px 16px;
+        border: 2px solid var(--border-light);
+        background: var(--card-white);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        text-decoration: none;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        border-color: var(--accent-orange);
+        color: var(--accent-orange);
+        background: rgba(255, 149, 0, 0.05);
+    }
+
+    .pagination-btn.active {
+        background: var(--accent-orange);
+        border-color: var(--accent-orange);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f0f0f0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 30px;
+        background: var(--card-white);
+        border-radius: 14px;
+        border: 1px solid var(--border-light);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--accent-orange);
+        opacity: 0.3;
+        margin-bottom: 20px;
+    }
+
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+        .module-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .module-controls {
+            flex-direction: column;
+        }
+
+        .products-table {
+            font-size: 0.85rem;
+        }
+
+        .products-table thead th,
+        .products-table tbody td {
+            padding: 12px;
+        }
+
+        .product-image-small {
+            width: 50px;
+            height: 50px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .module-title {
+            font-size: 1.5rem;
+        }
+
+        .products-table {
+            font-size: 0.8rem;
+        }
+
+        .products-table thead th,
+        .products-table tbody td {
+            padding: 10px;
+        }
+
+        .product-image-small {
+            width: 40px;
+            height: 40px;
+        }
+
+        .table-actions {
+            gap: 5px;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+        }
+    }
+</style>
+
+<div class="module-controls" style="display: flex; gap: 12px; align-items: center; width: 100%; flex-wrap: wrap; justify-content: flex-end;">
+    <form method="GET" action="{{ url_for('product_module.products_route') }}" style="min-width: 180px; max-width: 220px; flex: 0 1 220px;">
+        <div class="search-box" style="min-width: 0; max-width: 220px; padding: 8px 10px; gap: 8px;">
+            <i class="fas fa-search"></i>
+            <input type="text" name="search" placeholder="Search products..." value="{{ search_query or '' }}" style="font-size:0.92rem;">
+        </div>
+    </form>
+    <a href="{{ url_for('product_module.add_product') }}" class="btn-add" title="Add New Product" style="padding: 9px 18px; font-size: 0.92rem; min-width: 0;">
+        <i class="fas fa-plus-circle"></i> Add Product
+    </a>
+</div>
+
+{% if products %}
+<table class="products-table clean-list-table">
+    <thead>
+        <tr>
+            <th style="width:48px;"></th>
+            <th style="min-width:180px;">Product Name</th>
+            <th style="min-width:120px;">Category</th>
+            <th style="min-width:110px;">Stock</th>
+            <th style="min-width:90px;">Price</th>
+            <th style="min-width:110px;">Status</th>
+            <th style="width:60px;text-align:center;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td style="padding-left:18px;">
+                {% if product.image %}
+                    <img src="{{ url_for('static', filename='upload/thumb_' + product.image) }}" alt="{{ product.product_name }}" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1.5px solid #ececec;background:#f7f7f7;">
+                {% else %}
+                    <img src="https://static.vecteezy.com/system/resources/previews/022/059/000/non_2x/no-image-available-icon-vector.jpg" alt="No Image" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1.5px solid #ececec;background:#f7f7f7;">
+                {% endif %}
+            </td>
+            <td>
+                <div style="font-weight:600;font-size:1.04rem;color:var(--text-dark);">{{ product.product_name }}</div>
+                <div style="font-size:0.93rem;color:#b0b3b9;">ID: {{ product.id }}</div>
+            </td>
+            <td style="color:var(--text-secondary);font-weight:500;">{{ product.category_name }}</td>
+            <td>
+                {% if product.stock > 0 %}
+                    <span style="color:#388e3c;font-weight:600;background:rgba(76,175,80,0.08);padding:4px 12px;border-radius:12px;font-size:0.97em;">In Stock</span>
+                {% else %}
+                    <span style="color:#d32f2f;font-weight:600;background:rgba(244,67,54,0.08);padding:4px 12px;border-radius:12px;font-size:0.97em;">Out of Stock</span>
+                {% endif %}
+            </td>
+            <td class="price-text" style="font-size:1.01rem;">${{ product.price }}</td>
+            <td>
+                {% if product.status.lower() == 'published' or product.status.lower() == 'active' %}
+                    <span style="color:#388e3c;font-weight:600;background:rgba(76,175,80,0.13);padding:4px 12px;border-radius:12px;font-size:0.97em;">Published</span>
+                {% elif product.status.lower() == 'draft' or product.status.lower() == 'inactive' %}
+                    <span style="color:#bfa800;font-weight:600;background:rgba(255,193,7,0.13);padding:4px 12px;border-radius:12px;font-size:0.97em;">Draft</span>
+                {% else %}
+                    <span style="color:#b0b3b9;font-weight:600;background:rgba(160,160,160,0.10);padding:4px 12px;border-radius:12px;font-size:0.97em;">{{ product.status }}</span>
+                {% endif %}
+            </td>
+            <td style="text-align:center;">
+                <div class="table-actions" style="justify-content:center;gap:6px;">
+                    <a href="{{ url_for('product_module.edit_product', product_id=product.id) }}" class="action-btn edit-btn" title="Edit Product" style="background:#f5f6fa;border:1.2px solid #e0e0e0;color:#1e3a5f;width:32px;height:32px;font-size:1rem;padding:0;">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                    <a href="#" class="action-btn delete-btn" title="Delete Product" onclick="return confirm('Are you sure?');" style="background:#f5f6fa;border:1.2px solid #e0e0e0;color:#f44336;width:32px;height:32px;font-size:1rem;padding:0;">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-box-open"></i>
+    <p>No products found</p>
+    <a href="{{ url_for('product_module.add_product') }}" class="btn-add">
+        <i class="fas fa-plus"></i> Add Your First Product
+    </a>
+</div>
+{% endif %}
+
+<!-- Pagination -->
+<div class="pagination-container">
+    {% if page > 1 %}
+        <a href="{{ url_for('product_module.products_route', page=1) }}" class="pagination-btn">
+            <i class="fas fa-chevron-left"></i> First
+        </a>
+        <a href="{{ url_for('product_module.products_route', page=page-1) }}" class="pagination-btn">
+            Previous
+        </a>
+    {% else %}
+        <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i> First</button>
+        <button class="pagination-btn" disabled>Previous</button>
+    {% endif %}
+
+    <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <button class="pagination-btn active">{{ p }}</button>
+            {% else %}
+                <a href="{{ url_for('product_module.products_route', page=p) }}" class="pagination-btn">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if page < total_pages %}
+        <a href="{{ url_for('product_module.products_route', page=page+1) }}" class="pagination-btn">
+            Next
+        </a>
+        <a href="{{ url_for('product_module.products_route', page=total_pages) }}" class="pagination-btn">
+            Last <i class="fas fa-chevron-right"></i>
+        </a>
+    {% else %}
+        <button class="pagination-btn" disabled>Next</button>
+        <button class="pagination-btn" disabled>Last <i class="fas fa-chevron-right"></i></button>
+    {% endif %}
+</div>
+
+<script>
+window.addEventListener('load', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    const type = urlParams.get('type');
+    
+    if (message && typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: type === 'success' ? 'Success!' : 'Error!',
+            text: message,
+            icon: type === 'success' ? 'success' : 'error',
+            confirmButtonText: 'OK'
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+</script>
+
+{% endblock %}

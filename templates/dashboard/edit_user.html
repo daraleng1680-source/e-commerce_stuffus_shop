@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-4 text-right">
+            <a href="{{ url_for('user_module.user_list') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Users
+            </a>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('user_module.edit_user', user_id=user.id) }}" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" placeholder="Leave blank to keep current">
+                    <small class="form-text text-muted">Leave blank to keep current username</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter new password (leave blank to keep current)">
+                    <small class="form-text text-muted">Leave blank to keep current password</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile">Profile/Role</label>
+                    <select class="form-control" id="profile" name="profile">
+                        <option value="">Keep Current</option>
+                        <option value="Admin" {% if user.profile == 'Admin' %}selected{% endif %}>Admin</option>
+                        <option value="Manager" {% if user.profile == 'Manager' %}selected{% endif %}>Manager</option>
+                        <option value="User" {% if user.profile == 'User' %}selected{% endif %}>User</option>
+                        <option value="Guest" {% if user.profile == 'Guest' %}selected{% endif %}>Guest</option>
+                    </select>
+                    <small class="form-text text-muted">Select to change role, or leave as "Keep Current"</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="avatar">Avatar/Profile Image</label>
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*" onchange="previewImage(event)">
+                            <small class="form-text text-muted">Supported formats: JPG, PNG, GIF (Max 5MB)</small>
+                        </div>
+                        <div>
+                            {% if user.avatar %}
+                                <img id="preview" src="{{ url_for('static', filename='upload/' + user.avatar) }}" alt="Avatar" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #e0e0e0;">
+                            {% else %}
+                                <img id="preview" src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=ececec&color=555&size=160" alt="No Avatar" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:2px solid #e0e0e0;">
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update User
+                    </button>
+                    <a href="{{ url_for('user_module.user_list') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+    </script>
+</div>
+{% endblock %}

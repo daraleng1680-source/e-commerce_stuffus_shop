@@ -1,0 +1,69 @@
+{% extends "storefront/base.html" %}
+
+{% block title %}Order Confirmed - Stuffus{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-lg-8">
+        <div class="bg-white rounded-4 border p-5 shadow-sm text-center mb-5">
+            <div class="display-1 mb-4 text-success">✨</div>
+            <h1 class="text-extra-bold mb-2">Order Confirmed!</h1>
+            <p class="text-muted">Thank you for choosing Stuffus. We're getting your order ready.</p>
+            <div class="mt-4 d-inline-block bg-light px-4 py-2 rounded-pill small">
+                Order Number: <span class="text-bold">#{{ range(10000, 99999) | random }}</span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="bg-white rounded-4 border p-4 shadow-sm h-100">
+                    <h5 class="text-bold mb-4">Delivery Details</h5>
+                    <div class="d-flex flex-column gap-3">
+                        <div>
+                            <label class="small text-muted d-block">Shipping To</label>
+                            <span class="text-bold">{{ order_info.name }}</span>
+                        </div>
+                        <div>
+                            <label class="small text-muted d-block">Address</label>
+                            <span class="small">{{ order_info.address }}, {{ order_info.city }}, {{ order_info.country }}</span>
+                        </div>
+                        <div>
+                            <label class="small text-muted d-block">Contact</label>
+                            <span class="small">{{ order_info.email }} / {{ order_info.phone }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-light rounded-3 small border-start border-4 border-dark">
+                        <i class="fa fa-info-circle me-2"></i>
+                        A confirmation email has been sent to {{ order_info.email }}.
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="bg-white rounded-4 border p-4 shadow-sm">
+                    <h5 class="text-bold mb-4">Summary</h5>
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        {% for item in cart_items %}
+                            <div class="d-flex justify-content-between small">
+                                <span class="text-muted">{{ item.quantity }}x {{ item.product.product_name }}</span>
+                                <span class="text-bold">${{ "%.2f"|format(item.subtotal) }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex justify-content-between text-bold pt-3 border-top h5">
+                        <span>Paid</span>
+                        <span>${{ "%.2f"|format(total + 10 + (total * 0.1)) }}</span>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('storefront.complete_order') }}" class="mt-4">
+                        <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 text-bold shadow-sm">
+                            Back to Store
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

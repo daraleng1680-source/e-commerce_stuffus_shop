@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Stuffus - Premium Store{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/storefront.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('storefront.index') }}">Stuffus</a>
+            
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('storefront.shop') }}">Brands</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('storefront.shop') }}">Shop</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('storefront.shop') }}">Blog</a></li>
+                </ul>
+            </div>
+
+            <div class="d-flex align-items-center gap-4">
+                <a href="#" class="text-dark"><i class="fa fa-search"></i></a>
+                <a href="{{ url_for('storefront.view_cart') }}" class="text-dark position-relative">
+                    <i class="fa fa-shopping-cart"></i>
+                    {% if session.get('cart') %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                            {{ session.get('cart')|length }}
+                        </span>
+                    {% endif %}
+                </a>
+                <div class="dropdown">
+                    <a href="#" class="text-dark dropdown-toggle text-decoration-none" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-user-circle fa-lg"></i>
+                        {% if session.get('customer_id') %}
+                            <span class="ms-1 small">{{ session.get('customer_name', 'Account') }}</span>
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3 mt-2" aria-labelledby="userMenu">
+                        {% if session.get('customer_id') %}
+                            <li><a class="dropdown-item" href="{{ url_for('storefront.customer_orders') }}"><i class="fa fa-box me-2 text-muted"></i>My Orders</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('storefront.customer_logout') }}"><i class="fa fa-sign-out-alt me-2"></i>Logout</a></li>
+                        {% else %}
+                            <li><a class="dropdown-item" href="{{ url_for('storefront.customer_login') }}"><i class="fa fa-sign-in-alt me-2 text-muted"></i>Sign In</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('storefront.customer_register') }}"><i class="fa fa-user-plus me-2 text-muted"></i>Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' if category == 'success' else 'warning' if category == 'warning' else 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="container my-5">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer-minimal mt-5">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md-3">
+                    <h6 class="sidebar-title">About</h6>
+                    <ul class="list-unstyled text-muted small">
+                        <li class="mb-2">Blog</li>
+                        <li class="mb-2">Meet The Team</li>
+                        <li class="mb-2">Contact Us</li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="sidebar-title">Support</h6>
+                    <ul class="list-unstyled text-muted small">
+                        <li class="mb-2">Contact Us</li>
+                        <li class="mb-2">Shipping</li>
+                        <li class="mb-2">Return</li>
+                        <li class="mb-2">FAQ</li>
+                    </ul>
+                </div>
+                <div class="col-md-6 text-end">
+                    <h6 class="sidebar-title">Social Media</h6>
+                    <div class="d-flex justify-content-end">
+                        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-4 border-top border-light d-flex justify-content-between align-items-center">
+                <p class="text-muted small mb-0">&copy; 2024 Stuffus. All Rights Reserved.</p>
+                <div class="d-flex gap-3 text-muted small">
+                    <a href="{{ url_for('admin.dashboard_route') }}" class="text-muted text-decoration-none">Admin Panel</a>
+                    <span>Terms of Service</span>
+                    <span>Privacy Policy</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

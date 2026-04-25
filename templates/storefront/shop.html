@@ -1,0 +1,172 @@
+{% extends "storefront/base.html" %}
+
+{% block title %}Shop - Stuffus{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-shop">
+    <h1 class="hero-title">Shop</h1>
+</div>
+
+<!-- Main Section -->
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-3 sidebar-minimal">
+        <div class="mb-5">
+            <h6 class="sidebar-title">Category</h6>
+            <div class="d-flex flex-column gap-1">
+                <a href="{{ url_for('storefront.shop') }}" class="category-item {% if not selected_category %}active{% endif %}">
+                    <span><i class="fa fa-th-large me-2"></i> All Product</span>
+                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger" style="font-size: 0.7rem;">{{ products.total }}</span>
+                </a>
+                {% for category in categories %}
+                    <a href="{{ url_for('storefront.shop', category=category.id) }}" class="category-item {% if selected_category == category.id %}active{% endif %}">
+                        <span><i class="fa fa-{{ 'home' if 'Home' in category.category_name else 'music' if 'Music' in category.category_name else 'mobile-alt' if 'Phone' in category.category_name else 'database' if 'Storage' in category.category_name else 'box' }} me-2"></i> {{ category.category_name }}</span>
+                    </a>
+                {% endfor %}
+                
+                <a href="#" class="category-item">
+                    <span><i class="fa fa-star me-2"></i> New Arrival</span>
+                    <i class="fa fa-chevron-down small"></i>
+                </a>
+                <a href="#" class="category-item">
+                    <span><i class="fa fa-award me-2"></i> Best Seller</span>
+                    <i class="fa fa-chevron-down small"></i>
+                </a>
+                <a href="#" class="category-item">
+                    <span><i class="fa fa-percentage me-2"></i> On Discount</span>
+                    <i class="fa fa-chevron-down small"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="text-bold mb-0">Give All You Need</h5>
+            <form action="{{ url_for('storefront.shop') }}" method="GET" class="hero-search-container border" style="max-width: 300px; padding: 0.2rem 1rem;">
+                <i class="fa fa-search text-muted me-2 small"></i>
+                <input type="text" name="search" class="border-0 small flex-grow-1" placeholder="Search on Stuffus" style="outline: none;" value="{{ search_query or '' }}">
+                <button type="submit" class="btn btn-dark btn-sm rounded-pill px-3">Search</button>
+            </form>
+        </div>
+
+        <div class="row g-4">
+            {% for product in products.items %}
+                <div class="col-md-4">
+                    <div class="product-card-minimal">
+                        <div class="product-img-container">
+                            <a href="{{ url_for('storefront.product_detail', product_id=product.id) }}" class="d-block w-100 h-100">
+                                <span class="position-absolute top-0 end-0 m-3 badge bg-white text-dark border small rounded-pill">
+                                    {{ product.category.category_name if product.category else 'Other' }}
+                                </span>
+                                {% if product.image %}
+                                    <img src="{{ url_for('static', filename='upload/' + product.image) }}" class="w-100 h-100 object-fit-contain" alt="{{ product.product_name }}">
+                                {% else %}
+                                    <i class="fa fa-box fa-3x text-muted opacity-25"></i>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="product-info">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="product-name mb-1">
+                                        <a href="{{ url_for('storefront.product_detail', product_id=product.id) }}" class="text-dark text-decoration-none">{{ product.product_name }}</a>
+                                    </h6>
+                                    <div class="product-rating">
+                                        <i class="fa fa-star"></i> 5.0 <span class="text-muted">(1.2k Reviews)</span>
+                                    </div>
+                                </div>
+                                <div class="product-price text-bold">${{ "%.2f"|format(product.price) }}</div>
+                            </div>
+                            <div class="d-flex gap-2 mt-2">
+                                <form method="POST" action="{{ url_for('storefront.add_to_cart', product_id=product.id) }}" class="flex-grow-1">
+                                    <button class="btn-add-cart w-100">Add to Cart</button>
+                                </form>
+                                <button class="btn-buy-now">Buy Now</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if products.pages > 1 %}
+            <nav class="mt-5 border-top pt-4">
+                <ul class="pagination justify-content-center align-items-center gap-3">
+                    <li><a href="#" class="text-dark small text-decoration-none">&larr; Previous</a></li>
+                    {% for page_num in products.iter_pages() %}
+                        {% if page_num %}
+                            <li>
+                                <a href="{{ url_for('storefront.shop', page=page_num) }}" 
+                                   class="text-decoration-none small {% if page_num == products.page %}text-bold text-dark{% else %}text-muted{% endif %}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    <li><a href="#" class="text-dark small text-decoration-none">Next &rarr;</a></li>
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Recommendations Section -->
+<div class="mt-5 pt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="text-bold">Explore our recommendations</h4>
+        <div class="d-flex gap-2">
+            <button class="social-icon border-0"><i class="fa fa-chevron-left"></i></button>
+            <button class="social-icon border-0"><i class="fa fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <div class="row g-4">
+        <!-- Mock recommendations -->
+        <div class="col-md-3">
+             <div class="product-card-minimal">
+                <div class="product-img-container" style="background: #eef2f3;">
+                    <img src="https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?q=80&w=400&auto=format&fit=crop" alt="Recommendation">
+                </div>
+                <div class="product-info">
+                    <h6 class="product-name">TWS Bujug</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="product-rating small"><i class="fa fa-star"></i> 5.0 (1.2k Reviews)</div>
+                        <div class="product-price small text-bold">$29.90</div>
+                    </div>
+                </div>
+             </div>
+        </div>
+        <div class="col-md-3">
+             <div class="product-card-minimal">
+                <div class="product-img-container" style="background: #eef2f3;">
+                    <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400&auto=format&fit=crop" alt="Recommendation">
+                </div>
+                <div class="product-info">
+                    <h6 class="product-name">Headsound Baptis</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="product-rating small"><i class="fa fa-star"></i> 5.0 (1.2k Reviews)</div>
+                        <div class="product-price small text-bold">$12.00</div>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Banner -->
+<div class="cta-banner d-flex justify-content-between align-items-center">
+    <div>
+        <h2 class="text-extra-bold mb-2">Ready to Get<br>Our New Stuff?</h2>
+        <div class="d-flex mt-4">
+            <input type="text" class="cta-input" placeholder="Your Email">
+            <button class="btn-cta-send">Send</button>
+        </div>
+    </div>
+    <div class="text-end" style="max-width: 400px;">
+        <p class="small text-white text-opacity-50 mb-4">Stuffus for Homes and Needs. We'll listen to your needs, identify the best approach, and then create a bespoke smart home solution that's right for you.</p>
+    </div>
+</div>
+{% endblock %}

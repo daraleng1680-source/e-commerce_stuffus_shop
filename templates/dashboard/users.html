@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* User specific styles only */
+    .products-table.clean-list-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: var(--card-white);
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+    .products-table.clean-list-table th, .products-table.clean-list-table td {
+        padding: 16px 18px;
+        border-bottom: 1.5px solid var(--border-light);
+        background: var(--card-white);
+        font-size: 1rem;
+        vertical-align: middle;
+    }
+    .products-table.clean-list-table th {
+        background: var(--bg-light);
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 1.05rem;
+        border-top: none;
+    }
+    .products-table.clean-list-table tr:last-child td {
+        border-bottom: none;
+    }
+    .table-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .action-btn {
+        border-radius: 8px;
+        border: 1.2px solid #e0e0e0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-light);
+    }
+    .action-btn.edit-btn {
+        color: var(--primary-color);
+    }
+    .action-btn.edit-btn:hover {
+        background: var(--accent-orange);
+        color: #fff !important;
+        border-color: var(--accent-orange) !important;
+    }
+    .action-btn.delete-btn {
+        color: var(--danger-color);
+    }
+    .action-btn.delete-btn:hover {
+        background: var(--danger-color);
+        color: #fff !important;
+        border-color: var(--danger-color) !important;
+    }
+    @media (max-width: 768px) {
+        .products-table.clean-list-table th, .products-table.clean-list-table td {
+            padding: 10px 8px;
+            font-size: 0.97rem;
+        }
+    }
+</style>
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-4 text-right">
+            <a href="{{ url_for('user_module.add_user') }}" class="btn" style="background-color: #ff9500; color: white;">
+                <i class="fas fa-user-plus"></i> Add User
+            </a>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div style="margin-top:32px;">
+    <table class="products-table clean-list-table">
+        <thead>
+            <tr>
+                <th style="width:48px;"></th>
+                <th style="min-width:160px;">Username</th>
+                <th style="min-width:120px;">Profile</th>
+                <th style="width:100px;text-align:center;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if users %}
+                {% for user in users %}
+                <tr>
+                    <td style="padding-left:18px;">
+                        {% if user.avatar %}
+                            <img src="{{ url_for('static', filename='upload/' + user.avatar) }}" alt="{{ user.username }}" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1.5px solid #ececec;background:#f7f7f7;">
+                        {% else %}
+                            <img src="https://ui-avatars.com/api/?name={{ user.username|urlencode }}&background=ececec&color=555&size=64" alt="No Avatar" style="width:36px;height:36px;object-fit:cover;border-radius:8px;border:1.5px solid #ececec;background:#f7f7f7;">
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="font-weight:600;font-size:1.04rem;color:var(--text-dark);">{{ user.username }}</div>
+                        <div style="font-size:0.93rem;color:#b0b3b9;">ID: {{ user.id }}</div>
+                    </td>
+                    <td style="color:var(--text-secondary);font-weight:500;">{{ user.profile }}</td>
+                    <td style="text-align:center;">
+                        <div class="table-actions" style="justify-content:center;">
+                            <a href="{{ url_for('user_module.edit_user', user_id=user.id) }}" class="action-btn edit-btn" title="Edit User" style="width:32px;height:32px;font-size:1rem;padding:0;">
+                                <i class="fas fa-pen"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('user_module.delete_user', user_id=user.id) }}" style="display:inline;">
+                                <button type="submit" class="action-btn delete-btn" title="Delete User" style="width:32px;height:32px;font-size:1rem;padding:0;" onclick="return confirm('Are you sure you want to delete this user?');">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No users found</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('user_module.user_list', page=1) }}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('user_module.user_list', page=page-1) }}">Previous</a>
+                    </li>
+                {% endif %}
+
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ p }}</span>
+                        </li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('user_module.user_list', page=p) }}">{{ p }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page < total_pages %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('user_module.user_list', page=page+1) }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('user_module.user_list', page=total_pages) }}">Last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

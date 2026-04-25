@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+
+{% block title %}Order Management - Stuffus Admin{% endblock %}
+
+{% block content %}
+<div class="main-content ms-0 me-0 px-1">
+    <div class="page-header">
+        <div class="page-title">
+            <i class="fas fa-shopping-cart"></i>
+            Order Management
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="stats-container">
+        <div class="stat-mini">
+            <div class="stat-mini-value">{{ stats.total_orders }}</div>
+            <div class="stat-mini-label">Total Orders</div>
+        </div>
+        <div class="stat-mini">
+            <div class="stat-mini-value">{{ stats.total_revenue }}</div>
+            <div class="stat-mini-label">Total Revenue</div>
+        </div>
+        <div class="stat-mini">
+            <div class="stat-mini-value">{{ stats.pending_orders }}</div>
+            <div class="stat-mini-label">Pending</div>
+        </div>
+        <div class="stat-mini">
+            <div class="stat-mini-value">{{ stats.today_sales }}</div>
+            <div class="stat-mini-label">Today's Sales</div>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div class="search-box">
+            <i class="fas fa-search" style="color: #6c757d;"></i>
+            <input type="text" placeholder="Search by Order ID or Customer...">
+        </div>
+        <div class="filter-group">
+            <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+            <button class="btn-add" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+                <i class="fas fa-plus"></i> New Order
+            </button>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Email</th>
+                    <th>Total Amount</th>
+                    <th>Items</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="orderTableBody">
+                {% for order in orders %}
+                <tr>
+                    <td><strong>{{ order.id }}</strong></td>
+                    <td>{{ order.customer }}</td>
+                    <td>{{ order.email }}</td>
+                    <td><strong>{{ order.amount }}</strong></td>
+                    <td>{{ order.item_count }} items</td>
+                    <td><span class="status-badge status-{{ order.status }}">{{ order.status|capitalize }}</span></td>
+                    <td>{{ order.date }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon btn-view" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#orderDetailModal"
+                                    data-id="{{ order.id }}"
+                                    data-customer="{{ order.customer }}"
+                                    data-email="{{ order.email }}"
+                                    data-amount="{{ order.amount }}"
+                                    data-status="{{ order.status }}"
+                                    data-date="{{ order.date }}"
+                                    onclick="viewOrderDetails(this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn-icon btn-edit" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editStatusModal"
+                                    data-id="{{ order.id }}"
+                                    data-status="{{ order.status }}"
+                                    onclick="prepareEditModal(this)">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center">No orders found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item"><a class="page-link active" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">3</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+        </ul>
+    </nav>
+</div>
+
+<style>
+    /* Modal Styling */
+    .modal-content {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    }
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-orange) 100%);
+        color: white;
+        border: none;
+        border-radius: 14px 14px 0 0;
+        padding: 20px 24px;
+    }
+    .modal-header .btn-close {
+        filter: brightness(0) invert(1);
+    }
+    .modal-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    .modal-body {
+        padding: 24px;
+    }
+    .form-label {
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid var(--border-light);
+        padding: 10px 14px;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--accent-orange);
+        box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8c00 100%);
+        border: none;
+        padding: 10px 24px;
+        font-weight: 700;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    }
+    .btn-secondary {
+        padding: 10px 24px;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    /* Detail Modal specific */
+    .detail-section {
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid #eef0f2;
+        height: 100%;
+    }
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 800;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 12px;
+    }
+    .detail-item:last-child {
+        margin-bottom: 0;
+    }
+    .detail-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+    }
+    .detail-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+</style>
+
+<!-- Order Detail Modal -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Order Details - #12345</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="detail-section">
+                            <h6 class="section-title"><i class="fas fa-user"></i> Customer Information</h6>
+                            <div class="detail-item">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-value" id="viewCustomerName">John Doe</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Email</span>
+                                <span class="detail-value" id="viewCustomerEmail">john@example.com</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Phone</span>
+                                <span class="detail-value" id="viewCustomerPhone">(555) 123-4567</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-section">
+                            <h6 class="section-title"><i class="fas fa-info-circle"></i> Order Information</h6>
+                            <div class="detail-item">
+                                <span class="detail-label">Order ID</span>
+                                <span class="detail-value" id="viewOrderId">#12345</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Order Date</span>
+                                <span class="detail-value" id="viewOrderDate">Nov 27, 2025</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status</span>
+                                <span id="viewOrderStatus">
+                                    <span class="status-badge status-delivered">Delivered</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h6 class="form-label">Order Items</h6>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Snake Plant</td>
+                            <td>1</td>
+                            <td>$24.99</td>
+                            <td>$24.99</td>
+                        </tr>
+                        <tr>
+                            <td>Ceramic Pot (10")</td>
+                            <td>1</td>
+                            <td>$14.99</td>
+                            <td>$14.99</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                            <td><strong>$39.98</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                            <td><strong>$6.01</strong></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td><strong>$45.99</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Status Modal -->
+<div class="modal fade" id="editStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Order ID</label>
+                    <input type="text" class="form-control" value="#12345" disabled>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Current Status</label>
+                    <input type="text" class="form-control" value="Pending" disabled>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">New Status</label>
+                    <select class="form-select">
+                        <option selected>Pending</option>
+                        <option>Processing</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Notes (Optional)</label>
+                    <textarea class="form-control" rows="3" placeholder="Add any notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Update Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Order Modal -->
+<div class="modal fade" id="addOrderModal" tabindex="-1" aria-labelledby="addOrderLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addOrderLabel">
+                    <i class="fas fa-plus"></i> Create New Order
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newOrderForm" method="POST" action="{{ url_for('order_module.add_order') }}">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="orderCustomer" class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" id="orderCustomer" name="customer_name" placeholder="e.g., John Doe"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orderEmail" class="form-label">Customer Email</label>
+                            <input type="email" class="form-control" id="orderEmail" name="customer_email"
+                                placeholder="e.g., john@example.com" required>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="orderAmount" class="form-label">Total Amount ($)</label>
+                            <input type="number" class="form-control" id="orderAmount" name="amount" min="0" step="0.01"
+                                placeholder="e.g., 45.99" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="orderStatus" class="form-label">Order Status</label>
+                            <select class="form-select" id="orderStatus" name="status" required>
+                                <option value="">Select status</option>
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer px-0 pb-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('.search-input');
+        const table = document.querySelector('.table');
+        const tbody = table ? table.querySelector('tbody') : null;
+
+        function filterTable() {
+            if (!tbody) return;
+
+            const searchTerm = searchInput.value.toLowerCase();
+            const rows = tbody.querySelectorAll('tr');
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const orderId = cells[0] ? cells[0].textContent.toLowerCase() : '';
+                const customer = cells[1] ? cells[1].textContent.toLowerCase() : '';
+
+                if (orderId.includes(searchTerm) || customer.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('keyup', filterTable);
+        }
+    });
+
+    function viewOrderDetails(btn) {
+        const id = btn.getAttribute('data-id');
+        const customer = btn.getAttribute('data-customer');
+        const email = btn.getAttribute('data-email');
+        const amount = btn.getAttribute('data-amount');
+        const status = btn.getAttribute('data-status');
+        const date = btn.getAttribute('data-date');
+
+        document.getElementById('viewOrderId').textContent = id;
+        document.getElementById('viewCustomerName').textContent = customer;
+        document.getElementById('viewCustomerEmail').textContent = email;
+        document.getElementById('viewOrderDate').textContent = date;
+        
+        // Update status badge
+        const statusContainer = document.getElementById('viewOrderStatus');
+        statusContainer.innerHTML = `<span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>`;
+        
+        // Update modal title
+        document.querySelector('#orderDetailModal .modal-title').textContent = `Order Details - ${id}`;
+    }
+
+    function viewOrder(btn) {
+        const row = btn.closest('tr');
+        const orderId = row.querySelector('td:nth-child(1)').textContent;
+        console.log('View order:', orderId);
+    }
+
+    function editOrder(btn) {
+        const row = btn.closest('tr');
+        const orderId = row.querySelector('td:nth-child(1)').textContent;
+        console.log('Edit order:', orderId);
+    }
+
+    // Pagination functionality
+    document.querySelectorAll('.pagination-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            if (this.classList.contains('page-btn')) {
+                document.querySelectorAll('.pagination-btn.active').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            }
+        });
+    });
+</script>
+{% endblock %}
