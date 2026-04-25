@@ -136,3 +136,52 @@ Thumbs.db
 # Project specific
 uploads/
 instance/
+*.db
+*.sqlite
+*.sqlite3
+.env.local
+.env.*.local
+
+# Database backups
+*.db-journal
+*.sqlite-journal
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# OS specific
+.AppleDouble
+.LSOverride
+*.sublime-project
+*.sublime-workspace
+
+# Node modules (if using frontend build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python virtual environment
+venv/
+.venv/
+ENV/
+
+# VS Code extensions
+extensions.json
+settings.json
+
+# Misc
+.env.example.local
+config.local.py
+secrets.json
+
+create_db.py
+create_admin.py
+debug_login.py
+fix_password.py
+MODEL_RELATIONSHIPS.md
+seed_data.py
+
+
