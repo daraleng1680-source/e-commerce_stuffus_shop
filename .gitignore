@@ -177,11 +177,4 @@ settings.json
 config.local.py
 secrets.json
 
-create_db.py
-create_admin.py
-debug_login.py
-fix_password.py
-MODEL_RELATIONSHIPS.md
-seed_data.py
-
 

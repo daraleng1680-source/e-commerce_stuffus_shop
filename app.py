@@ -82,5 +82,9 @@ app = create_app()
 
 if __name__ == '__main__':
     with app.app_context():
+        # Create all tables if they don't exist
         db.create_all()
-    app.run(debug=True)
+    
+    # Use environment variable to determine debug mode
+    debug_mode = app.config.get('DEBUG', False)
+    app.run(debug=debug_mode, host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
