@@ -19,9 +19,15 @@ def customer_login_required(f):
 def index():
     """Premium landing page with featured content"""
     from model import Product, Category
+    from extensions import db
     
-    featured_products = Product.query.filter_by(status='instock').limit(4).all()
-    categories = Category.query.all()
+    try:
+        featured_products = Product.query.filter_by(status='instock').limit(4).all()
+        categories = Category.query.all()
+    except Exception as e:
+        # If database error, return empty lists
+        featured_products = []
+        categories = []
     
     return render_template('storefront/index.html', 
                          featured_products=featured_products,
@@ -38,17 +44,22 @@ def shop():
     category_id = request.args.get('category', type=int)
     search_query = request.args.get('search', '')
     
-    # Build query
-    query = Product.query.filter_by(status='instock')
-    
-    if category_id:
-        query = query.filter_by(category_id=category_id)
-    
-    if search_query:
-        query = query.filter(Product.product_name.ilike(f'%{search_query}%'))
-    
-    products = query.paginate(page=page, per_page=12)
-    categories = Category.query.all()
+    try:
+        # Build query
+        query = Product.query.filter_by(status='instock')
+        
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+        
+        if search_query:
+            query = query.filter(Product.product_name.ilike(f'%{search_query}%'))
+        
+        products = query.paginate(page=page, per_page=12)
+        categories = Category.query.all()
+    except Exception as e:
+        # If database error, return empty results
+        products = None
+        categories = []
     
     return render_template('storefront/shop.html', 
                          products=products,
@@ -62,12 +73,17 @@ def product_detail(product_id):
     """Display product detail page"""
     from model import Product
     
-    product = Product.query.get_or_404(product_id)
-    related_products = Product.query.filter(
-        Product.category_id == product.category_id,
-        Product.id != product_id,
-        Product.status == 'instock'
-    ).limit(4).all()
+    try:
+        product = Product.query.get_or_404(product_id)
+        related_products = Product.query.filter(
+            Product.category_id == product.category_id,
+            Product.id != product_id,
+            Product.status == 'instock'
+        ).limit(4).all()
+    except Exception as e:
+        # If database error, redirect to shop
+        flash("Product not found.", "warning")
+        return redirect(url_for("storefront.shop"))
     
     return render_template('storefront/product_detail.html',
                          product=product,
