@@ -51,6 +51,22 @@ def create_app(config_class=config):
     def page_not_found(e):
         # If a page isn't found, take them back to the homepage
         return redirect(url_for("storefront.index"))
+    
+    @app.errorhandler(500)
+    def internal_error(e):
+        # Log the error and return a safe error page
+        import traceback
+        print(f"500 Error: {e}")
+        print(traceback.format_exc())
+        return f"Internal Server Error: {str(e)}", 500
+
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        # Log any unhandled exceptions
+        import traceback
+        print(f"Unhandled Exception: {e}")
+        print(traceback.format_exc())
+        return f"Error: {str(e)}", 500
 
     @app.before_request
     def protect_routes():
