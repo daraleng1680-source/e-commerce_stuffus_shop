@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, url_for, Blueprint, flash
-from app import db, User
+from extensions import db
+from model import User
 from routes.admin.auth import login_required
 
 admin_bp = Blueprint('user_module', __name__, url_prefix='')

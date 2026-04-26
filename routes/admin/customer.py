@@ -1,5 +1,6 @@
 from flask import render_template, Blueprint, request, redirect, url_for, flash
 from routes.admin.auth import login_required
+from extensions import db
 import json
 
 # Create Blueprint
@@ -10,7 +11,6 @@ admin_bp = Blueprint('customer_module', __name__, url_prefix='')
 def customers_route():
     from model import Customer, Order
     from sqlalchemy import func
-    from app import db
 
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -120,7 +120,6 @@ def customers_route():
 @login_required
 def add_customer():
     from model import Customer
-    from app import db
 
     try:
         name = request.form.get('name', '').strip()

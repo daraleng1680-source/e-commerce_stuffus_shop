@@ -1,5 +1,6 @@
 from flask import render_template, Blueprint
 from routes.admin.auth import login_required
+from extensions import db
 
 # Create Blueprint
 admin_bp = Blueprint('order_module', __name__, url_prefix='')
@@ -10,7 +11,6 @@ def orders_route():
     from model import Order
     from sqlalchemy import func
     from datetime import datetime, date
-    from app import db
     
     db_orders = Order.query.order_by(Order.created_at.desc()).all()
     
@@ -61,7 +61,6 @@ def orders_route():
 @login_required
 def add_order():
     from model import Order
-    from app import db
     from flask import request, redirect, url_for, flash
     
     try:

@@ -2,6 +2,7 @@ from flask import render_template, Blueprint
 from .dashboard import get_analytics_stats, generate_chart_data
 from routes.admin.auth import login_required
 from model import Product
+from extensions import db
 import random
 
 # Create Blueprint
@@ -12,7 +13,6 @@ admin_bp = Blueprint('analytics_module', __name__, url_prefix='')
 def analytics_route():
     from model import Product, Category, Order
     from sqlalchemy import func
-    from app import db
     import json
     
     period = 'week'

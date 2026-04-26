@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request, Blueprint,session,redirect,url_for,flash
 from routes.admin.auth import login_required
 import random
-from app import db
+from extensions import db
 
 # Create Blueprint
 dashboard_bp = Blueprint('admin', __name__, url_prefix='')
