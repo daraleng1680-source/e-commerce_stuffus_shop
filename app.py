@@ -94,7 +94,20 @@ def create_app(config_class=config):
 
     return app
 
-app = create_app()
+try:
+    app = create_app()
+except Exception as e:
+    # If app creation fails, log the error and create a minimal app
+    import traceback
+    print(f"Error creating app: {e}")
+    print(traceback.format_exc())
+    
+    # Create a minimal Flask app that shows the error
+    app = Flask(__name__)
+    
+    @app.route('/')
+    def error():
+        return f"<h1>Application Error During Startup</h1><pre>{str(e)}\n\n{traceback.format_exc()}</pre>", 500
 
 if __name__ == '__main__':
     with app.app_context():
